@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("EMPLOYEE")
+  createdAt DateTime @default(now())
+
+  employee          Employee?
+  managedDepartment Department?
+}
+
+model Employee {
+  id            Int          @id @default(autoincrement())
+  userId        Int          @unique
+  employeeCode  String       @unique
+  phone         String?
+  dateOfBirth   DateTime?
+  dateOfJoining DateTime
+  departmentId  Int?
+  designationId Int?
+  createdAt     DateTime     @default(now())
+  attendance    Attendance[]
+  department    Department?  @relation(fields: [departmentId], references: [id])
+  designation   Designation? @relation(fields: [designationId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  leaves        Leave[]
+}
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  managerId Int?     @unique
+  createdAt DateTime @default(now())
+
+  employees Employee[]
+  manager   User?      @relation(fields: [managerId], references: [id])
+}
+
+model Designation {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  employees Employee[]
+}
+
+model Attendance {
+  id         Int       @id @default(autoincrement())
+  employeeId Int
+  date       DateTime
+  checkIn    DateTime?
+  checkOut   DateTime?
+  status     String
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+}
+
+model Leave {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  leaveType  String
+  fromDate   DateTime
+  toDate     DateTime
+  reason     String?
+  status     String   @default("PENDING")
+  approvedBy Int?
+  createdAt  DateTime @default(now())
+  employee   Employee @relation(fields: [employeeId], references: [id])
+}
