@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { jwtVerify } from "jose";
+import prisma from "@/lib/prisma";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -27,41 +28,100 @@ export default async function DashboardPage() {
   }
 
   // Get dashboard statistics
-  let stats;
+  // Get dashboard statistics directly from Prisma
+let stats = {
+  totalEmployees: 0,
+  presentToday: 0,
+  onLeave: 0,
+  absentToday: 0,
+  pendingLeaves: 0,
+};
 
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+try {
+  let employeeWhere = {};
 
-    const response = await fetch(
-      `${baseUrl}/api/dashboard/stats`,
-      {
-        headers: {
-          Cookie: `auth_token=${token}`,
+  if (user.role === "ADMIN") {
+    employeeWhere = {};
+  } else if (user.role === "MANAGER") {
+    const department = await prisma.department.findUnique({
+      where: {
+        managerId: Number(user.userId),
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (department) {
+      employeeWhere = {
+        departmentId: department.id,
+        user: {
+          role: "EMPLOYEE",
         },
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch dashboard statistics");
+      };
     }
-
-    const data = await response.json();
-
-    stats = data.stats;
-  } catch (error) {
-    console.error("Dashboard stats error:", error);
-
-    stats = {
-      totalEmployees: 0,
-      presentToday: 0,
-      onLeave: 0,
-      absentToday: 0,
-      pendingLeaves: 0,
+  } else if (user.role === "EMPLOYEE") {
+    employeeWhere = {
+      userId: Number(user.userId),
     };
   }
 
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const totalEmployees = await prisma.employee.count({
+    where: employeeWhere,
+  });
+
+  const presentToday = await prisma.attendance.count({
+    where: {
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+      status: "PRESENT",
+      employee: employeeWhere,
+    },
+  });
+
+  const onLeave = await prisma.leave.count({
+    where: {
+      status: "APPROVED",
+      fromDate: {
+        lte: endOfDay,
+      },
+      toDate: {
+        gte: startOfDay,
+      },
+      employee: employeeWhere,
+    },
+  });
+
+  const pendingLeaves = await prisma.leave.count({
+    where: {
+      status: "PENDING",
+      employee: employeeWhere,
+    },
+  });
+
+  const absentToday = Math.max(
+    totalEmployees - presentToday - onLeave,
+    0
+  );
+
+  stats = {
+    totalEmployees,
+    presentToday,
+    onLeave,
+    absentToday,
+    pendingLeaves,
+  };
+} catch (error) {
+  console.error("Dashboard Prisma stats error:", error);
+}
   // --------------------------------------------------
   // ADMIN DASHBOARD
   // --------------------------------------------------
