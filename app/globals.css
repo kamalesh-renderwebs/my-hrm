@@ -3,27 +3,31 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ================================
-   LIGHT THEME
+   LIGHT THEME VARIABLES
 ================================ */
 
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
+  --card-foreground: #0f172a;
   --border: #e2e8f0;
   --muted: #64748b;
+  --input-bg: #ffffff;
 }
 
 /* ================================
-   DARK THEME
+   DARK THEME VARIABLES
 ================================ */
 
 .dark {
-  --background: #0f172a;
+  --background: #090d16;
   --foreground: #f8fafc;
-  --card: #1e293b;
-  --border: #334155;
-  --muted: #94a3b8;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --border: #1f2937;
+  --muted: #9ca3af;
+  --input-bg: #1f2937;
 }
 
 /* ================================
@@ -33,21 +37,144 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
   --color-card: var(--card);
   --color-border: var(--border);
   --color-muted: var(--muted);
-
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 /* ================================
-   BODY
+   BASE BODY STYLES
 ================================ */
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ================================
+   DARK THEME OVERRIDES FOR ALL PAGES & COMPONENTS
+================================ */
+
+.dark body {
+  background-color: #090d16 !important;
+  color: #f8fafc !important;
+}
+
+/* Cards, Modals & Containers */
+.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+}
+
+.dark .bg-\[\#F8FAFC\],
+.dark .bg-slate-50,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: #0d1322 !important;
+}
+
+/* Borders */
+.dark .border-\[\#E2E8F0\],
+.dark .border-slate-200,
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: #1f2937 !important;
+}
+
+.dark .divide-\[\#E2E8F0\] > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+
+/* Primary text headings */
+.dark .text-\[\#0F172A\],
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-black {
+  color: #f9fafb !important;
+}
+
+/* Secondary & Muted text */
+.dark .text-\[\#64748B\],
+.dark .text-slate-500,
+.dark .text-slate-600,
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-\[\#94A3B8\] {
+  color: #6b7280 !important;
+}
+
+/* Table headers & rows */
+.dark table thead,
+.dark table thead tr,
+.dark table thead th {
+  background-color: #151d30 !important;
+  color: #9ca3af !important;
+  border-color: #1f2937 !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: #1a2338 !important;
+}
+
+/* Form Inputs, Selects, and Textareas */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="date"],
+.dark input[type="number"],
+.dark select,
+.dark textarea {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+.dark select option {
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+}
+
+/* Modals & Dialogs */
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Light Badges in Dark Mode */
+.dark .bg-purple-50 {
+  background-color: rgba(147, 51, 234, 0.15) !important;
+  color: #c084fc !important;
+  border-color: rgba(147, 51, 234, 0.3) !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+  color: #60a5fa !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
 }

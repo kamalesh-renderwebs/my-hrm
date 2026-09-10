@@ -47,3 +47,8 @@ export type Attendance = Prisma.AttendanceModel
  * 
  */
 export type Leave = Prisma.LeaveModel
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = Prisma.ActivityLogModel

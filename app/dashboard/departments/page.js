@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState([]);
@@ -10,73 +9,117 @@ export default function DepartmentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Add Department states
+  // Add
   const [showAddForm, setShowAddForm] = useState(false);
   const [departmentName, setDepartmentName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Edit Department states
+  // Edit
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-  // Delete Department state
+  // Delete
   const [deletingId, setDeletingId] = useState(null);
 
-  // Manager assignment state
+  // Manager
   const [assigningManagerId, setAssigningManagerId] = useState(null);
 
-  // Fetch departments
+  // Notification
+  const [notification, setNotification] = useState(null);
+
+  // Delete modal
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    departmentId: null,
+    departmentName: "",
+  });
+
+  function showNotification(type, message) {
+    setNotification({ type, message });
+
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  }
+
+  // --------------------------------------------------
+  // FETCH DEPARTMENTS
+  // --------------------------------------------------
+
   async function fetchDepartments() {
     try {
-      const response = await fetch("/api/departments");
+      setLoading(true);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch departments");
-      }
+      const response = await fetch("/api/departments", {
+        cache: "no-store",
+      });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch departments");
+      }
 
       setDepartments(data);
     } catch (error) {
       console.error("Error fetching departments:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to fetch departments"
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  // Fetch managers
+  // --------------------------------------------------
+  // FETCH MANAGERS
+  // --------------------------------------------------
+
   async function fetchManagers() {
     try {
-      const response = await fetch("/api/users/managers");
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch managers");
-      }
+      const response = await fetch("/api/users/managers", {
+        cache: "no-store",
+      });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch managers");
+      }
 
       setManagers(data);
     } catch (error) {
       console.error("Error fetching managers:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to fetch managers"
+      );
     }
   }
 
-  // Fetch data
+  // --------------------------------------------------
+  // INITIAL LOAD
+  // --------------------------------------------------
+
   useEffect(() => {
     fetchDepartments();
     fetchManagers();
   }, []);
 
-  // Add Department
+  // --------------------------------------------------
+  // ADD DEPARTMENT
+  // --------------------------------------------------
+
   async function handleAddDepartment(e) {
     e.preventDefault();
 
     if (!departmentName.trim()) {
-      alert("Department name is required");
+      showNotification("error", "Department name is required");
       return;
     }
 
@@ -111,64 +154,90 @@ export default function DepartmentsPage() {
       setDepartmentName("");
       setShowAddForm(false);
 
-      alert("Department created successfully!");
+      showNotification(
+        "success",
+        "Department created successfully"
+      );
     } catch (error) {
       console.error("Add department error:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to create department"
+      );
     } finally {
       setSaving(false);
     }
   }
 
-  // Start Edit
+  // --------------------------------------------------
+  // EDIT DEPARTMENT
+  // --------------------------------------------------
+
   async function handleEdit(departmentId) {
     try {
       setEditLoading(true);
 
-      const response = await fetch(`/api/departments/${departmentId}`);
+      const response = await fetch(
+        `/api/departments/${departmentId}`
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch department");
+        throw new Error(
+          data.error || "Failed to fetch department"
+        );
       }
 
       setEditingId(departmentId);
       setEditName(data.name);
     } catch (error) {
       console.error("Edit department error:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to load department"
+      );
     } finally {
       setEditLoading(false);
     }
   }
 
-  // Update Department
+  // --------------------------------------------------
+  // UPDATE DEPARTMENT
+  // --------------------------------------------------
+
   async function handleUpdateDepartment(e) {
     e.preventDefault();
 
     if (!editName.trim()) {
-      alert("Department name is required");
+      showNotification("error", "Department name is required");
       return;
     }
 
     try {
       setUpdating(true);
 
-      const response = await fetch(`/api/departments/${editingId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editName.trim(),
-        }),
-      });
+      const response = await fetch(
+        `/api/departments/${editingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: editName.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update department");
+        throw new Error(
+          data.error || "Failed to update department"
+        );
       }
 
       setDepartments((prev) =>
@@ -185,46 +254,82 @@ export default function DepartmentsPage() {
       setEditingId(null);
       setEditName("");
 
-      alert("Department updated successfully!");
+      showNotification(
+        "success",
+        "Department updated successfully"
+      );
     } catch (error) {
       console.error("Update department error:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to update department"
+      );
     } finally {
       setUpdating(false);
     }
   }
 
-  // Cancel Edit
+  // --------------------------------------------------
+  // CANCEL EDIT
+  // --------------------------------------------------
+
   function handleCancelEdit() {
     setEditingId(null);
     setEditName("");
   }
 
-  // Delete Department
-  async function handleDelete(departmentId) {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this department?"
-    );
+  // --------------------------------------------------
+  // DELETE MODAL
+  // --------------------------------------------------
 
-    if (!confirmDelete) {
-      return;
-    }
+  function openDeleteModal(department) {
+    setDeleteModal({
+      open: true,
+      departmentId: department.id,
+      departmentName: department.name,
+    });
+  }
+
+  function closeDeleteModal() {
+    setDeleteModal({
+      open: false,
+      departmentId: null,
+      departmentName: "",
+    });
+  }
+
+  // --------------------------------------------------
+  // DELETE DEPARTMENT
+  // --------------------------------------------------
+
+  async function handleDelete() {
+    const departmentId = deleteModal.departmentId;
+
+    if (!departmentId) return;
 
     try {
       setDeletingId(departmentId);
 
-      const response = await fetch(`/api/departments/${departmentId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/departments/${departmentId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to delete department");
+        throw new Error(
+          data.error || "Failed to delete department"
+        );
       }
 
       setDepartments((prev) =>
-        prev.filter((department) => department.id !== departmentId)
+        prev.filter(
+          (department) => department.id !== departmentId
+        )
       );
 
       if (editingId === departmentId) {
@@ -232,17 +337,32 @@ export default function DepartmentsPage() {
         setEditName("");
       }
 
-      alert("Department deleted successfully!");
+      closeDeleteModal();
+
+      showNotification(
+        "success",
+        "Department deleted successfully"
+      );
     } catch (error) {
       console.error("Delete department error:", error);
-      alert(error.message);
+
+      showNotification(
+        "error",
+        error.message || "Failed to delete department"
+      );
     } finally {
       setDeletingId(null);
     }
   }
 
-  // Assign Manager
-  async function handleAssignManager(departmentId, managerId) {
+  // --------------------------------------------------
+  // ASSIGN MANAGER
+  // --------------------------------------------------
+
+  async function handleAssignManager(
+    departmentId,
+    managerId
+  ) {
     try {
       setAssigningManagerId(departmentId);
 
@@ -254,7 +374,9 @@ export default function DepartmentsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            managerId: managerId ? Number(managerId) : null,
+            managerId: managerId
+              ? Number(managerId)
+              : null,
           }),
         }
       );
@@ -262,7 +384,9 @@ export default function DepartmentsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to assign manager");
+        throw new Error(
+          data.error || "Failed to assign manager"
+        );
       }
 
       setDepartments((prev) =>
@@ -277,78 +401,269 @@ export default function DepartmentsPage() {
         )
       );
 
-      alert(data.message);
+      showNotification(
+        "success",
+        data.message || "Manager updated successfully"
+      );
     } catch (error) {
       console.error("Assign manager error:", error);
-      alert(error.message);
 
-      // Reload departments if assignment fails
+      showNotification(
+        "error",
+        error.message || "Failed to assign manager"
+      );
+
       fetchDepartments();
     } finally {
       setAssigningManagerId(null);
     }
   }
 
-  // Search filter
-  const filteredDepartments = departments.filter((department) =>
-    department.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // --------------------------------------------------
+  // SEARCH
+  // --------------------------------------------------
 
-  // Total employees
+  const filteredDepartments = useMemo(() => {
+    return departments.filter((department) =>
+      department.name
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [departments, search]);
+
+  // --------------------------------------------------
+  // STATISTICS
+  // --------------------------------------------------
+
   const totalEmployees = departments.reduce(
-    (total, department) => total + (department.employeeCount || 0),
+    (total, department) =>
+      total + (department.employeeCount || 0),
     0
   );
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Departments
-          </h1>
+  const activeDepartments = departments.length;
 
-          <p className="text-sm text-gray-500 mt-1">
-            Manage departments and assign department managers.
-          </p>
+  // --------------------------------------------------
+  // LOADING
+  // --------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse" />
+          <div className="h-4 w-72 bg-slate-200 rounded mt-3 animate-pulse" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="bg-white border border-slate-200 rounded-2xl p-6 animate-pulse"
+            >
+              <div className="h-4 w-32 bg-slate-200 rounded" />
+              <div className="h-8 w-16 bg-slate-200 rounded mt-4" />
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 animate-pulse">
+          <div className="h-5 w-40 bg-slate-200 rounded" />
+          <div className="h-12 w-full bg-slate-100 rounded-xl mt-5" />
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
+          <div className="h-16 bg-slate-100" />
+          <div className="h-16 border-t border-slate-100" />
+          <div className="h-16 border-t border-slate-100" />
+          <div className="h-16 border-t border-slate-100" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 pb-8">
+
+      {/* =====================================================
+          NOTIFICATION
+      ===================================================== */}
+
+      {notification && (
+        <div className="fixed top-5 right-5 z-[100] w-[calc(100%-40px)] sm:w-auto sm:min-w-[320px]">
+          <div
+            className={`rounded-xl border px-4 py-3 shadow-lg flex items-start gap-3 ${
+              notification.type === "success"
+                ? "bg-emerald-50 border-emerald-200"
+                : "bg-red-50 border-red-200"
+            }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                notification.type === "success"
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-red-100 text-red-600"
+              }`}
+            >
+              {notification.type === "success"
+                ? "✓"
+                : "!"}
+            </div>
+
+            <div className="flex-1">
+              <p
+                className={`text-sm font-medium ${
+                  notification.type === "success"
+                    ? "text-emerald-800"
+                    : "text-red-800"
+                }`}
+              >
+                {notification.message}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setNotification(null)}
+              className="text-slate-400 hover:text-slate-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-xl">
+              🏢
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Departments
+              </h1>
+
+              <p className="text-sm text-slate-500 mt-1">
+                Manage departments and assign department
+                managers.
+              </p>
+            </div>
+          </div>
         </div>
 
         <button
           type="button"
-          onClick={() => setShowAddForm(true)}
-          className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition"
+          onClick={() => {
+            setShowAddForm(true);
+            setEditingId(null);
+          }}
+          className="w-full lg:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition shadow-sm"
         >
-          + Add Department
+          <span className="text-lg leading-none">
+            +
+          </span>
+          Add Department
         </button>
       </div>
 
-      {/* Add Department Form */}
+      {/* =====================================================
+          STATISTICS
+      ===================================================== */}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+
+        {/* Total Departments */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Total Departments
+              </p>
+
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">
+                {departments.length}
+              </h2>
+            </div>
+
+            <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-xl">
+              🏢
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-4">
+            Organization departments
+          </p>
+        </div>
+
+        {/* Total Employees */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Total Employees
+              </p>
+
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">
+                {totalEmployees}
+              </h2>
+            </div>
+
+            <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center text-xl">
+              👥
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-4">
+            Employees across departments
+          </p>
+        </div>
+
+        {/* Active Departments */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Active Departments
+              </p>
+
+              <h2 className="text-3xl font-bold text-slate-900 mt-2">
+                {activeDepartments}
+              </h2>
+            </div>
+
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center text-xl">
+              ✓
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-4">
+            Currently active
+          </p>
+        </div>
+      </div>
+
+      {/* =====================================================
+          ADD DEPARTMENT
+      ===================================================== */}
+
       {showAddForm && (
-        <div className="bg-white border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Add Department
-          </h2>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Add Department
+              </h2>
 
-          <form
-            onSubmit={handleAddDepartment}
-            className="mt-4 flex flex-col md:flex-row gap-3"
-          >
-            <input
-              type="text"
-              placeholder="Enter department name"
-              value={departmentName}
-              onChange={(e) => setDepartmentName(e.target.value)}
-              className="flex-1 border rounded-lg px-4 py-2.5 text-black outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save Department"}
-            </button>
+              <p className="text-sm text-slate-500 mt-1">
+                Create a new organization department.
+              </p>
+            </div>
 
             <button
               type="button"
@@ -356,246 +671,343 @@ export default function DepartmentsPage() {
                 setShowAddForm(false);
                 setDepartmentName("");
               }}
-              className="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50"
+              className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 text-xl"
             >
-              Cancel
+              ×
             </button>
+          </div>
+
+          <form
+            onSubmit={handleAddDepartment}
+            className="p-5 sm:p-6"
+          >
+            <div className="max-w-xl">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Department Name
+              </label>
+
+              <input
+                type="text"
+                placeholder="e.g. Development"
+                value={departmentName}
+                onChange={(e) =>
+                  setDepartmentName(e.target.value)
+                }
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition"
+              />
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-5">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setDepartmentName("");
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {saving ? "Saving..." : "Save Department"}
+              </button>
+            </div>
           </form>
         </div>
       )}
 
-      {/* Edit Department Form */}
+      {/* =====================================================
+          EDIT DEPARTMENT
+      ===================================================== */}
+
       {editingId !== null && (
-        <div className="bg-white border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Edit Department
-          </h2>
+        <div className="bg-white border border-blue-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 sm:px-6 py-4 border-b border-blue-100 bg-blue-50/50 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Edit Department
+              </h2>
 
-          <form
-            onSubmit={handleUpdateDepartment}
-            className="mt-4 flex flex-col md:flex-row gap-3"
-          >
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              className="flex-1 border rounded-lg px-4 py-2.5 text-black outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <button
-              type="submit"
-              disabled={updating}
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {updating ? "Updating..." : "Update Department"}
-            </button>
+              <p className="text-sm text-slate-500 mt-1">
+                Update the department information.
+              </p>
+            </div>
 
             <button
               type="button"
               onClick={handleCancelEdit}
-              className="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50"
+              className="w-8 h-8 rounded-lg hover:bg-white text-slate-500 text-xl"
             >
-              Cancel
+              ×
             </button>
+          </div>
+
+          <form
+            onSubmit={handleUpdateDepartment}
+            className="p-5 sm:p-6"
+          >
+            <div className="max-w-xl">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Department Name
+              </label>
+
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) =>
+                  setEditName(e.target.value)
+                }
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition"
+              />
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-5">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={updating}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+              >
+                {updating
+                  ? "Updating..."
+                  : "Update Department"}
+              </button>
+            </div>
           </form>
         </div>
       )}
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white border rounded-xl p-5">
-          <p className="text-sm text-gray-500">
-            Total Departments
-          </p>
+      {/* =====================================================
+          SEARCH
+      ===================================================== */}
 
-          <h2 className="text-2xl font-bold text-gray-800 mt-2">
-            {departments.length}
-          </h2>
-        </div>
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">
+              Department Directory
+            </h2>
 
-        <div className="bg-white border rounded-xl p-5">
-          <p className="text-sm text-gray-500">
-            Total Employees
-          </p>
+            <p className="text-sm text-slate-500 mt-1">
+              Search and manage your organization departments.
+            </p>
+          </div>
 
-          <h2 className="text-2xl font-bold text-blue-600 mt-2">
-            {totalEmployees}
-          </h2>
-        </div>
+          <div className="relative w-full sm:w-80">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              🔍
+            </span>
 
-        <div className="bg-white border rounded-xl p-5">
-          <p className="text-sm text-gray-500">
-            Active Departments
-          </p>
-
-          <h2 className="text-2xl font-bold text-green-600 mt-2">
-            {departments.length}
-          </h2>
+            <input
+              type="text"
+              placeholder="Search departments..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="bg-white border rounded-xl p-5">
-        <input
-          type="text"
-          placeholder="Search department..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/2 border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 text-black"
-        />
-      </div>
+      {/* =====================================================
+          DESKTOP TABLE
+      ===================================================== */}
 
-      {/* Department Table */}
-      <div className="bg-white border rounded-xl overflow-hidden">
-        <div className="p-5 border-b">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Department List
-          </h2>
+      <div className="hidden lg:block bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        {/* Table Header */}
+        <div className="px-6 py-5 border-b border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Department List
+              </h2>
+
+              <p className="text-sm text-slate-500 mt-1">
+                {filteredDepartments.length} department
+                {filteredDepartments.length !== 1
+                  ? "s"
+                  : ""}{" "}
+                found
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
-            <thead className="bg-gray-50">
-              <tr className="text-left text-sm text-gray-500">
-                <th className="px-6 py-4">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-left">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Department
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Department ID
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Manager
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Employees
                 </th>
 
-                <th className="px-6 py-4">
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Status
                 </th>
 
-                <th className="px-6 py-4">
-                  Action
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Actions
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y">
-              {loading ? (
+            <tbody className="divide-y divide-slate-100">
+              {filteredDepartments.length === 0 ? (
                 <tr>
                   <td
                     colSpan="6"
-                    className="px-6 py-8 text-center text-gray-500"
+                    className="px-6 py-14 text-center"
                   >
-                    Loading departments...
-                  </td>
-                </tr>
-              ) : filteredDepartments.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-8 text-center text-gray-500"
-                  >
-                    No departments found.
+                    <div className="flex flex-col items-center">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl">
+                        🏢
+                      </div>
+
+                      <h3 className="text-base font-semibold text-slate-800 mt-4">
+                        No departments found
+                      </h3>
+
+                      <p className="text-sm text-slate-500 mt-1">
+                        Try changing your search or add a
+                        new department.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredDepartments.map((department) => (
                   <tr
                     key={department.id}
-                    className="hover:bg-gray-50"
+                    className="hover:bg-slate-50/70 transition"
                   >
                     {/* Department */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-lg shrink-0">
                           🏢
                         </div>
 
                         <div>
-                          <p className="font-medium text-gray-800">
+                          <p className="font-semibold text-slate-800">
                             {department.name}
                           </p>
 
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs text-slate-500 mt-0.5">
                             Organization department
                           </p>
                         </div>
                       </div>
                     </td>
 
-                    {/* Department ID */}
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      DEPT
-                      {String(department.id).padStart(3, "0")}
+                    {/* ID */}
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">
+                        DEPT-
+                        {String(department.id).padStart(
+                          3,
+                          "0"
+                        )}
+                      </span>
                     </td>
 
                     {/* Manager */}
                     <td className="px-6 py-4">
-                      <select
-                        value={department.managerId || ""}
-                        onChange={(e) =>
-                          handleAssignManager(
-                            department.id,
-                            e.target.value
-                          )
-                        }
-                        disabled={
-                          assigningManagerId === department.id ||
-                          managers.length === 0
-                        }
-                        className="w-full min-w-[180px] border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                      >
-                        <option value="">
-                          {assigningManagerId === department.id
-                            ? "Updating..."
-                            : "No Manager"}
-                        </option>
-
-                        {managers.map((manager) => (
-                          <option
-                            key={manager.id}
-                            value={manager.id}
-                          >
-                            {manager.name}
+                      <div className="min-w-[190px]">
+                        <select
+                          value={
+                            department.managerId || ""
+                          }
+                          onChange={(e) =>
+                            handleAssignManager(
+                              department.id,
+                              e.target.value
+                            )
+                          }
+                          disabled={
+                            assigningManagerId ===
+                              department.id ||
+                            managers.length === 0
+                          }
+                          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 bg-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 disabled:opacity-50 transition"
+                        >
+                          <option value="">
+                            {assigningManagerId ===
+                            department.id
+                              ? "Updating..."
+                              : "No Manager"}
                           </option>
-                        ))}
-                      </select>
 
-                      {department.manager && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {department.manager.email}
-                        </p>
-                      )}
+                          {managers.map((manager) => (
+                            <option
+                              key={manager.id}
+                              value={manager.id}
+                            >
+                              {manager.name}
+                            </option>
+                          ))}
+                        </select>
+
+                        {department.manager && (
+                          <p className="text-xs text-slate-400 mt-1.5 truncate max-w-[200px]">
+                            {department.manager.email}
+                          </p>
+                        )}
+                      </div>
                     </td>
 
                     {/* Employees */}
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {department.employeeCount || 0}
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-medium text-slate-700">
+                        {department.employeeCount || 0}
+                      </span>
                     </td>
 
                     {/* Status */}
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
                     </td>
 
-                    {/* Action */}
+                    {/* Actions */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        {/* Edit */}
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => handleEdit(department.id)}
+                          onClick={() =>
+                            handleEdit(department.id)
+                          }
                           disabled={
                             editLoading ||
                             deletingId === department.id
                           }
-                          className="text-blue-600 hover:underline text-sm disabled:opacity-50"
+                          className="px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition"
                         >
                           {editLoading &&
                           editingId === department.id
@@ -603,16 +1015,15 @@ export default function DepartmentsPage() {
                             : "Edit"}
                         </button>
 
-                        {/* Delete */}
                         <button
                           type="button"
                           onClick={() =>
-                            handleDelete(department.id)
+                            openDeleteModal(department)
                           }
                           disabled={
                             deletingId === department.id
                           }
-                          className="text-red-600 hover:underline text-sm disabled:opacity-50"
+                          className="px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 transition"
                         >
                           {deletingId === department.id
                             ? "Deleting..."
@@ -627,7 +1038,232 @@ export default function DepartmentsPage() {
           </table>
         </div>
       </div>
+
+      {/* =====================================================
+          MOBILE CARDS
+      ===================================================== */}
+
+      <div className="lg:hidden space-y-4">
+
+        <div className="bg-white border border-slate-200 rounded-2xl px-5 py-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Department List
+          </h2>
+
+          <p className="text-sm text-slate-500 mt-1">
+            {filteredDepartments.length} department
+            {filteredDepartments.length !== 1
+              ? "s"
+              : ""}{" "}
+            found
+          </p>
+        </div>
+
+        {filteredDepartments.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mx-auto">
+              🏢
+            </div>
+
+            <h3 className="text-base font-semibold text-slate-800 mt-4">
+              No departments found
+            </h3>
+
+            <p className="text-sm text-slate-500 mt-1">
+              Try changing your search or add a new
+              department.
+            </p>
+          </div>
+        ) : (
+          filteredDepartments.map((department) => (
+            <div
+              key={department.id}
+              className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+            >
+              {/* Card Header */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-xl shrink-0">
+                    🏢
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate">
+                      {department.name}
+                    </h3>
+
+                    <p className="text-xs text-slate-500 mt-1">
+                      DEPT-
+                      {String(department.id).padStart(
+                        3,
+                        "0"
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Active
+                </span>
+              </div>
+
+              {/* Details */}
+              <div className="mt-5 pt-5 border-t border-slate-100 space-y-4">
+
+                {/* Manager */}
+                <div>
+                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                    Manager
+                  </p>
+
+                  <select
+                    value={department.managerId || ""}
+                    onChange={(e) =>
+                      handleAssignManager(
+                        department.id,
+                        e.target.value
+                      )
+                    }
+                    disabled={
+                      assigningManagerId ===
+                        department.id ||
+                      managers.length === 0
+                    }
+                    className="w-full mt-2 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 bg-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {assigningManagerId === department.id
+                        ? "Updating..."
+                        : "No Manager"}
+                    </option>
+
+                    {managers.map((manager) => (
+                      <option
+                        key={manager.id}
+                        value={manager.id}
+                      >
+                        {manager.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {department.manager && (
+                    <p className="text-xs text-slate-400 mt-1.5">
+                      {department.manager.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Employee count */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-500">
+                    Employees
+                  </span>
+
+                  <span className="text-sm font-semibold text-slate-800">
+                    {department.employeeCount || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="grid grid-cols-2 gap-3 mt-5 pt-5 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleEdit(department.id)
+                  }
+                  disabled={
+                    editLoading ||
+                    deletingId === department.id
+                  }
+                  className="px-4 py-2.5 rounded-xl border border-blue-200 text-blue-600 font-medium text-sm hover:bg-blue-50 disabled:opacity-50 transition"
+                >
+                  {editLoading &&
+                  editingId === department.id
+                    ? "Loading..."
+                    : "Edit"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    openDeleteModal(department)
+                  }
+                  disabled={
+                    deletingId === department.id
+                  }
+                  className="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 font-medium text-sm hover:bg-red-50 disabled:opacity-50 transition"
+                >
+                  {deletingId === department.id
+                    ? "Deleting..."
+                    : "Delete"}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* =====================================================
+          DELETE CONFIRMATION MODAL
+      ===================================================== */}
+
+      {deleteModal.open && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onClick={closeDeleteModal}
+          />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div className="p-6">
+
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-xl mb-4">
+                🗑️
+              </div>
+
+              <h2 className="text-xl font-bold text-slate-900">
+                Delete Department?
+              </h2>
+
+              <p className="text-sm text-slate-500 mt-2 leading-6">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-slate-800">
+                  {deleteModal.departmentName}
+                </span>
+                ? This action cannot be undone.
+              </p>
+
+              <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={closeDeleteModal}
+                  disabled={deletingId !== null}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deletingId !== null}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 transition"
+                >
+                  {deletingId !== null
+                    ? "Deleting..."
+                    : "Delete Department"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
-

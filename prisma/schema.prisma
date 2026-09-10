@@ -17,6 +17,7 @@ model User {
 
   employee          Employee?
   managedDepartment Department?
+  activityLogs ActivityLog[]
 }
 
 model Employee {
@@ -74,4 +75,14 @@ model Leave {
   approvedBy Int?
   createdAt  DateTime @default(now())
   employee   Employee @relation(fields: [employeeId], references: [id])
+}
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  action      String
+  module      String
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
 }

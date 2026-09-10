@@ -54,6 +54,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const token = await new SignJWT({
   userId: user.id,
+  name: user.name,
   role: user.role,
   email: user.email,
 })

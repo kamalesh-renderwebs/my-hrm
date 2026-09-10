@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
+import { createActivityLog } from "@/lib/activityLog";
 
 // ==================================================
 // GET Employees
@@ -178,8 +179,25 @@ export async function GET() {
 // CREATE Employee / Manager
 // ==================================================
 
+
 export async function POST(request) {
   try {
+    // -----------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------
+
+    const user = await requireAuth();
+
+    // Only ADMIN can create employees
+    if (user.role !== "ADMIN") {
+      return NextResponse.json(
+        {
+          error: "Only administrators can create employees",
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -283,11 +301,12 @@ export async function POST(request) {
     // CHECK EMPLOYEE CODE
     // -----------------------------------------------
 
-    const existingEmployee = await prisma.employee.findUnique({
-      where: {
-        employeeCode: employeeCode.trim(),
-      },
-    });
+    const existingEmployee =
+      await prisma.employee.findUnique({
+        where: {
+          employeeCode: employeeCode.trim(),
+        },
+      });
 
     if (existingEmployee) {
       return NextResponse.json(
@@ -354,90 +373,119 @@ export async function POST(request) {
     // HASH PASSWORD
     // -----------------------------------------------
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
 
     // -----------------------------------------------
     // CREATE USER + EMPLOYEE
     // -----------------------------------------------
 
-    const result = await prisma.$transaction(async (tx) => {
-      // Create User
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // -------------------------------------------
+        // CREATE USER
+        // -------------------------------------------
 
-      const user = await tx.user.create({
-        data: {
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          password: hashedPassword,
-          role: selectedRole,
-        },
-      });
-
-      // Create Employee
-
-      const employee = await tx.employee.create({
-        data: {
-          userId: user.id,
-          employeeCode: employeeCode.trim(),
-          phone: phone?.trim() || null,
-
-          dateOfBirth: dateOfBirth
-            ? new Date(dateOfBirth)
-            : null,
-
-          dateOfJoining: new Date(dateOfJoining),
-
-          departmentId: Number(departmentId),
-
-          designationId: designationId
-            ? Number(designationId)
-            : null,
-        },
-
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-
-          department: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-
-          designation: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-
-      // ---------------------------------------------
-      // If Manager
-      // Assign Manager to Department
-      // ---------------------------------------------
-
-      if (selectedRole === "MANAGER") {
-        await tx.department.update({
-          where: {
-            id: Number(departmentId),
-          },
-
+        const newUser = await tx.user.create({
           data: {
-            managerId: user.id,
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password: hashedPassword,
+            role: selectedRole,
           },
         });
-      }
 
-      return employee;
+        // -------------------------------------------
+        // CREATE EMPLOYEE
+        // -------------------------------------------
+
+        const employee = await tx.employee.create({
+          data: {
+            userId: newUser.id,
+
+            employeeCode: employeeCode.trim(),
+
+            phone: phone?.trim() || null,
+
+            dateOfBirth: dateOfBirth
+              ? new Date(dateOfBirth)
+              : null,
+
+            dateOfJoining: new Date(dateOfJoining),
+
+            departmentId: Number(departmentId),
+
+            designationId: designationId
+              ? Number(designationId)
+              : null,
+          },
+
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+
+            department: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+
+            designation: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+
+        // -------------------------------------------
+        // ASSIGN MANAGER TO DEPARTMENT
+        // -------------------------------------------
+
+        if (selectedRole === "MANAGER") {
+          await tx.department.update({
+            where: {
+              id: Number(departmentId),
+            },
+
+            data: {
+              managerId: newUser.id,
+            },
+          });
+        }
+
+        return employee;
+      }
+    );
+
+    // -----------------------------------------------
+    // ACTIVITY LOG
+    // -----------------------------------------------
+
+    await createActivityLog({
+      userId: user.id,
+      action: "CREATE",
+      module: "EMPLOYEE",
+
+      description:
+        selectedRole === "MANAGER"
+          ? `Created manager ${result.user.name} and assigned to ${result.department.name} department`
+          : `Created employee ${result.user.name}`,
     });
+
+    // -----------------------------------------------
+    // RESPONSE
+    // -----------------------------------------------
 
     return NextResponse.json(
       {
@@ -452,6 +500,15 @@ export async function POST(request) {
     );
   } catch (error) {
     console.error("Create employee error:", error);
+
+    if (error.message === "UNAUTHORIZED") {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        { status: 401 }
+      );
+    }
 
     return NextResponse.json(
       {

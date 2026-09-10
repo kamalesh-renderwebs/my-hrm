@@ -161,10 +161,10 @@ export default function EmployeesPage() {
 
   function getRoleBadge(role) {
     if (role === "MANAGER") {
-      return "bg-purple-50 text-purple-700 border-purple-200";
+      return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800";
     }
 
-    return "bg-blue-50 text-blue-700 border-blue-200";
+    return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800";
   }
 
   // --------------------------------------------------
@@ -173,15 +173,15 @@ export default function EmployeesPage() {
 
   function ActiveBadge() {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-[#10B981]">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 text-xs font-medium text-[#10B981] dark:text-emerald-400">
+        <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] dark:bg-emerald-400" />
         ACTIVE
       </span>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] space-y-6">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 space-y-6 transition-colors duration-200">
 
       {/* ==================================================
           PAGE HEADER
@@ -190,11 +190,11 @@ export default function EmployeesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">
+          <h1 className="text-2xl font-bold text-[#0F172A] dark:text-white">
             Employees
           </h1>
 
-          <p className="mt-1 text-sm text-[#64748B]">
+          <p className="mt-1 text-sm text-[#64748B] dark:text-slate-400">
             Manage employees and managers in your organization.
           </p>
         </div>
@@ -213,15 +213,15 @@ export default function EmployeesPage() {
       ================================================== */}
 
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-4 py-3">
 
-          <p className="text-sm font-medium text-[#EF4444]">
+          <p className="text-sm font-medium text-[#EF4444] dark:text-red-400">
             {error}
           </p>
 
           <button
             onClick={fetchEmployees}
-            className="text-sm font-semibold text-[#EF4444] hover:underline"
+            className="text-sm font-semibold text-[#EF4444] dark:text-red-400 hover:underline cursor-pointer"
           >
             Retry
           </button>
@@ -237,17 +237,17 @@ export default function EmployeesPage() {
 
         {/* Total */}
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-colors">
 
-          <p className="text-sm font-medium text-[#64748B]">
+          <p className="text-sm font-medium text-[#64748B] dark:text-slate-400">
             Total People
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-[#0F172A]">
+          <h2 className="mt-2 text-2xl font-bold text-[#0F172A] dark:text-white">
             {totalEmployees}
           </h2>
 
-          <p className="mt-1 text-xs text-[#64748B]">
+          <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
             Employees + Managers
           </p>
 
@@ -255,17 +255,17 @@ export default function EmployeesPage() {
 
         {/* Employees */}
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-colors">
 
-          <p className="text-sm font-medium text-[#64748B]">
+          <p className="text-sm font-medium text-[#64748B] dark:text-slate-400">
             Employees
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-[#2563EB]">
+          <h2 className="mt-2 text-2xl font-bold text-[#2563EB] dark:text-blue-400">
             {normalEmployees}
           </h2>
 
-          <p className="mt-1 text-xs text-[#64748B]">
+          <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
             Regular employees
           </p>
 
@@ -273,17 +273,17 @@ export default function EmployeesPage() {
 
         {/* Managers */}
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-colors">
 
-          <p className="text-sm font-medium text-[#64748B]">
+          <p className="text-sm font-medium text-[#64748B] dark:text-slate-400">
             Managers
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-[#8B5CF6]">
+          <h2 className="mt-2 text-2xl font-bold text-[#8B5CF6] dark:text-purple-400">
             {totalManagers}
           </h2>
 
-          <p className="mt-1 text-xs text-[#64748B]">
+          <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
             Department managers
           </p>
 
@@ -291,17 +291,17 @@ export default function EmployeesPage() {
 
         {/* Active */}
 
-        <div className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-colors">
 
-          <p className="text-sm font-medium text-[#64748B]">
+          <p className="text-sm font-medium text-[#64748B] dark:text-slate-400">
             Active
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-[#10B981]">
+          <h2 className="mt-2 text-2xl font-bold text-[#10B981] dark:text-emerald-400">
             {activeEmployees}
           </h2>
 
-          <p className="mt-1 text-xs text-[#64748B]">
+          <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
             Present today
           </p>
 
@@ -313,7 +313,7 @@ export default function EmployeesPage() {
           SEARCH & FILTER
       ================================================== */}
 
-      <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm sm:p-5">
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs sm:p-5 transition-colors">
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
 
@@ -321,13 +321,13 @@ export default function EmployeesPage() {
 
           <div className="md:col-span-2">
 
-            <label className="mb-2 block text-xs font-medium text-[#64748B]">
+            <label className="mb-2 block text-xs font-medium text-[#64748B] dark:text-slate-400">
               Search
             </label>
 
             <div className="relative">
 
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8]">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#94A3B8] dark:text-slate-500">
                 🔍
               </span>
 
@@ -336,7 +336,7 @@ export default function EmployeesPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, email or employee ID..."
-                className="w-full rounded-xl border border-[#E2E8F0] bg-white py-3 pl-11 pr-4 text-sm text-[#0F172A] outline-none transition placeholder:text-[#94A3B8] focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-11 pr-4 text-sm text-[#0F172A] dark:text-slate-100 outline-none transition placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
               />
 
             </div>
@@ -347,7 +347,7 @@ export default function EmployeesPage() {
 
           <div>
 
-            <label className="mb-2 block text-xs font-medium text-[#64748B]">
+            <label className="mb-2 block text-xs font-medium text-[#64748B] dark:text-slate-400">
               Department
             </label>
 
@@ -356,10 +356,10 @@ export default function EmployeesPage() {
               onChange={(e) =>
                 setDepartmentFilter(e.target.value)
               }
-              className="w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] outline-none transition focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-[#0F172A] dark:text-slate-100 outline-none transition focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
             >
 
-              <option value="">
+              <option value="" className="dark:bg-slate-800 dark:text-slate-100">
                 All Departments
               </option>
 
@@ -367,6 +367,7 @@ export default function EmployeesPage() {
                 <option
                   key={department.id}
                   value={department.id}
+                  className="dark:bg-slate-800 dark:text-slate-100"
                 >
                   {department.name}
                 </option>
@@ -380,7 +381,7 @@ export default function EmployeesPage() {
 
           <div>
 
-            <label className="mb-2 block text-xs font-medium text-[#64748B]">
+            <label className="mb-2 block text-xs font-medium text-[#64748B] dark:text-slate-400">
               Role
             </label>
 
@@ -389,18 +390,18 @@ export default function EmployeesPage() {
               onChange={(e) =>
                 setRoleFilter(e.target.value)
               }
-              className="w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] outline-none transition focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-[#0F172A] dark:text-slate-100 outline-none transition focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
             >
 
-              <option value="">
+              <option value="" className="dark:bg-slate-800 dark:text-slate-100">
                 All Roles
               </option>
 
-              <option value="EMPLOYEE">
+              <option value="EMPLOYEE" className="dark:bg-slate-800 dark:text-slate-100">
                 Employee
               </option>
 
-              <option value="MANAGER">
+              <option value="MANAGER" className="dark:bg-slate-800 dark:text-slate-100">
                 Manager
               </option>
 
@@ -413,15 +414,15 @@ export default function EmployeesPage() {
         {/* Filter result */}
 
         {(search || departmentFilter || roleFilter) && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E2E8F0] pt-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E2E8F0] dark:border-slate-800 pt-4">
 
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#64748B] dark:text-slate-400">
               Showing{" "}
-              <span className="font-semibold text-[#0F172A]">
+              <span className="font-semibold text-[#0F172A] dark:text-white">
                 {filteredEmployees.length}
               </span>{" "}
               of{" "}
-              <span className="font-semibold text-[#0F172A]">
+              <span className="font-semibold text-[#0F172A] dark:text-white">
                 {employees.length}
               </span>{" "}
               people
@@ -434,7 +435,7 @@ export default function EmployeesPage() {
                 setDepartmentFilter("");
                 setRoleFilter("");
               }}
-              className="text-sm font-medium text-[#2563EB] hover:underline"
+              className="text-sm font-medium text-[#2563EB] dark:text-blue-400 hover:underline cursor-pointer"
             >
               Clear filters
             </button>
@@ -448,19 +449,19 @@ export default function EmployeesPage() {
           EMPLOYEE LIST
       ================================================== */}
 
-      <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-colors">
 
         {/* Table Header */}
 
-        <div className="flex flex-col gap-1 border-b border-[#E2E8F0] p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 border-b border-[#E2E8F0] dark:border-slate-800 p-5 sm:flex-row sm:items-center sm:justify-between">
 
           <div>
 
-            <h2 className="text-lg font-semibold text-[#0F172A]">
+            <h2 className="text-lg font-semibold text-[#0F172A] dark:text-white">
               Employee List
             </h2>
 
-            <p className="mt-1 text-xs text-[#64748B]">
+            <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
               {filteredEmployees.length} records found
             </p>
 
@@ -476,9 +477,9 @@ export default function EmployeesPage() {
 
           <table className="w-full">
 
-            <thead className="bg-[#F8FAFC]">
+            <thead className="bg-[#F8FAFC] dark:bg-slate-800/60">
 
-              <tr className="border-b border-[#E2E8F0] text-left text-xs font-semibold uppercase tracking-wide text-[#64748B]">
+              <tr className="border-b border-[#E2E8F0] dark:border-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-[#64748B] dark:text-slate-400">
 
                 <th className="px-6 py-4">
                   Employee
@@ -512,7 +513,7 @@ export default function EmployeesPage() {
 
             </thead>
 
-            <tbody className="divide-y divide-[#E2E8F0]">
+            <tbody className="divide-y divide-[#E2E8F0] dark:divide-slate-800">
 
               {loading ? (
 
@@ -520,7 +521,7 @@ export default function EmployeesPage() {
 
                   <td
                     colSpan="7"
-                    className="px-6 py-12 text-center text-sm text-[#64748B]"
+                    className="px-6 py-12 text-center text-sm text-[#64748B] dark:text-slate-400"
                   >
                     Loading employees...
                   </td>
@@ -538,15 +539,15 @@ export default function EmployeesPage() {
 
                     <div className="flex flex-col items-center">
 
-                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F8FAFC] text-xl">
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F8FAFC] dark:bg-slate-800 text-xl">
                         👤
                       </div>
 
-                      <p className="text-sm font-medium text-[#0F172A]">
+                      <p className="text-sm font-medium text-[#0F172A] dark:text-white">
                         No employees found
                       </p>
 
-                      <p className="mt-1 text-xs text-[#64748B]">
+                      <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
                         Try changing your search or filters.
                       </p>
 
@@ -576,7 +577,7 @@ export default function EmployeesPage() {
 
                     <tr
                       key={employee.id}
-                      className="transition hover:bg-[#F8FAFC]"
+                      className="transition hover:bg-[#F8FAFC] dark:hover:bg-slate-800/50"
                     >
 
                       {/* Employee */}
@@ -585,17 +586,17 @@ export default function EmployeesPage() {
 
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 font-semibold text-[#2563EB]">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/80 font-semibold text-[#2563EB] dark:text-blue-400">
                             {initials}
                           </div>
 
                           <div className="min-w-0">
 
-                            <p className="truncate text-sm font-semibold text-[#0F172A]">
+                            <p className="truncate text-sm font-semibold text-[#0F172A] dark:text-slate-100">
                               {name}
                             </p>
 
-                            <p className="truncate text-xs text-[#64748B]">
+                            <p className="truncate text-xs text-[#64748B] dark:text-slate-400">
                               {email}
                             </p>
 
@@ -607,7 +608,7 @@ export default function EmployeesPage() {
 
                       {/* Employee ID */}
 
-                      <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
+                      <td className="px-6 py-4 text-sm font-medium text-[#0F172A] dark:text-slate-200">
                         {employee.employeeCode}
                       </td>
 
@@ -627,13 +628,13 @@ export default function EmployeesPage() {
 
                       {/* Department */}
 
-                      <td className="px-6 py-4 text-sm text-[#64748B]">
+                      <td className="px-6 py-4 text-sm text-[#64748B] dark:text-slate-400">
                         {employee.department?.name || "-"}
                       </td>
 
                       {/* Designation */}
 
-                      <td className="px-6 py-4 text-sm text-[#64748B]">
+                      <td className="px-6 py-4 text-sm text-[#64748B] dark:text-slate-400">
                         {employee.designation?.name || "-"}
                       </td>
 
@@ -653,7 +654,7 @@ export default function EmployeesPage() {
 
                         <Link
                           href={`/dashboard/employees/${employee.id}`}
-                          className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
+                          className="text-sm font-semibold text-[#2563EB] dark:text-blue-400 hover:text-[#1D4ED8] dark:hover:text-blue-300 hover:underline"
                         >
                           View
                         </Link>
@@ -677,11 +678,11 @@ export default function EmployeesPage() {
             MOBILE CARDS
         ================================================== */}
 
-        <div className="divide-y divide-[#E2E8F0] md:hidden">
+        <div className="divide-y divide-[#E2E8F0] dark:divide-slate-800 md:hidden">
 
           {loading ? (
 
-            <div className="px-5 py-12 text-center text-sm text-[#64748B]">
+            <div className="px-5 py-12 text-center text-sm text-[#64748B] dark:text-slate-400">
               Loading employees...
             </div>
 
@@ -689,15 +690,15 @@ export default function EmployeesPage() {
 
             <div className="px-5 py-12 text-center">
 
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F8FAFC] text-xl">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F8FAFC] dark:bg-slate-800 text-xl">
                 👤
               </div>
 
-              <p className="text-sm font-medium text-[#0F172A]">
+              <p className="text-sm font-medium text-[#0F172A] dark:text-white">
                 No employees found
               </p>
 
-              <p className="mt-1 text-xs text-[#64748B]">
+              <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
                 Try changing your search or filters.
               </p>
 
@@ -729,17 +730,17 @@ export default function EmployeesPage() {
 
                     <div className="flex min-w-0 items-center gap-3">
 
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 font-semibold text-[#2563EB]">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950/80 font-semibold text-[#2563EB] dark:text-blue-400">
                         {getInitials(name)}
                       </div>
 
                       <div className="min-w-0">
 
-                        <p className="truncate text-sm font-semibold text-[#0F172A]">
+                        <p className="truncate text-sm font-semibold text-[#0F172A] dark:text-white">
                           {name}
                         </p>
 
-                        <p className="truncate text-xs text-[#64748B]">
+                        <p className="truncate text-xs text-[#64748B] dark:text-slate-400">
                           {email}
                         </p>
 
@@ -763,11 +764,11 @@ export default function EmployeesPage() {
 
                     <div>
 
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8]">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8] dark:text-slate-500">
                         Employee ID
                       </p>
 
-                      <p className="mt-1 text-sm font-medium text-[#0F172A]">
+                      <p className="mt-1 text-sm font-medium text-[#0F172A] dark:text-slate-200">
                         {employee.employeeCode}
                       </p>
 
@@ -775,7 +776,7 @@ export default function EmployeesPage() {
 
                     <div>
 
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8]">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8] dark:text-slate-500">
                         Status
                       </p>
 
@@ -784,7 +785,7 @@ export default function EmployeesPage() {
                           <ActiveBadge />
                         </div>
                       ) : (
-                        <p className="mt-1 text-sm text-[#94A3B8]">
+                        <p className="mt-1 text-sm text-[#94A3B8] dark:text-slate-500">
                           —
                         </p>
                       )}
@@ -793,11 +794,11 @@ export default function EmployeesPage() {
 
                     <div>
 
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8]">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8] dark:text-slate-500">
                         Department
                       </p>
 
-                      <p className="mt-1 text-sm text-[#64748B]">
+                      <p className="mt-1 text-sm text-[#64748B] dark:text-slate-400">
                         {employee.department?.name || "-"}
                       </p>
 
@@ -805,11 +806,11 @@ export default function EmployeesPage() {
 
                     <div>
 
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8]">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-[#94A3B8] dark:text-slate-500">
                         Designation
                       </p>
 
-                      <p className="mt-1 text-sm text-[#64748B]">
+                      <p className="mt-1 text-sm text-[#64748B] dark:text-slate-400">
                         {employee.designation?.name || "-"}
                       </p>
 
@@ -821,7 +822,7 @@ export default function EmployeesPage() {
 
                   <Link
                     href={`/dashboard/employees/${employee.id}`}
-                    className="mt-4 block w-full rounded-xl border border-[#E2E8F0] py-2.5 text-center text-sm font-semibold text-[#2563EB] transition hover:bg-[#F8FAFC]"
+                    className="mt-4 block w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 py-2.5 text-center text-sm font-semibold text-[#2563EB] dark:text-blue-400 transition hover:bg-[#F8FAFC] dark:hover:bg-slate-800"
                   >
                     View Employee
                   </Link>
