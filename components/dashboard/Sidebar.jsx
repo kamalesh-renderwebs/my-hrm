@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const menuSections = [
   {
@@ -32,7 +32,6 @@ const menuSections = [
         href: "/dashboard/designations",
         icon: "◈",
       },
-      
     ],
   },
   {
@@ -48,7 +47,7 @@ const menuSections = [
         href: "/dashboard/leave",
         icon: "▱",
       },
-        {
+      {
         name: "Activity record",
         href: "/dashboard/history",
         icon: "📥",
@@ -74,6 +73,7 @@ const menuSections = [
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   function isActive(href) {
     if (href === "/dashboard") {
@@ -83,9 +83,29 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     return pathname.startsWith(href);
   }
 
+  // Logout
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Close mobile sidebar
+      setMobileOpen(false);
+
+      // Go to login page
+      router.replace("/login");
+
+      // Refresh authentication state
+      router.refresh();
+    }
+  }
+
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile Overlay */}
       {mobileOpen && (
         <button
           onClick={() => setMobileOpen(false)}
@@ -106,8 +126,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       >
         <div className="flex h-full flex-col">
 
-          {/* Logo */}
+          {/* ================= LOGO ================= */}
           <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
+
             <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
@@ -128,21 +149,27 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
               </div>
             </Link>
 
-            {/* Mobile close */}
+            {/* Mobile Close Button */}
             <button
+              type="button"
               onClick={() => setMobileOpen(false)}
-              className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+              className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden"
+              aria-label="Close sidebar"
             >
               ✕
             </button>
           </div>
 
-          {/* Navigation */}
+          {/* ================= NAVIGATION ================= */}
           <nav className="flex-1 overflow-y-auto px-4 py-6">
 
             {menuSections.map((section) => (
-              <div key={section.title} className="mb-7">
+              <div
+                key={section.title}
+                className="mb-7"
+              >
 
+                {/* Section Title */}
                 <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.15em] text-slate-500">
                   {section.title}
                 </p>
@@ -167,6 +194,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                           }
                         `}
                       >
+
+                        {/* Icon */}
                         <span
                           className={`
                             flex h-8 w-8 items-center justify-center rounded-lg text-base
@@ -180,11 +209,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                           {item.icon}
                         </span>
 
-                        <span>{item.name}</span>
+                        {/* Name */}
+                        <span>
+                          {item.name}
+                        </span>
 
+                        {/* Active Indicator */}
                         {active && (
                           <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
                         )}
+
                       </Link>
                     );
                   })}
@@ -195,16 +229,20 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
           </nav>
 
-          {/* Bottom profile */}
+          {/* ================= BOTTOM PROFILE ================= */}
           <div className="border-t border-white/10 p-4">
 
+            {/* Profile */}
             <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
 
+              {/* Avatar */}
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-sm font-semibold">
                 A
               </div>
 
-              <div className="min-w-0">
+              {/* User Info */}
+              <div className="min-w-0 flex-1">
+
                 <p className="truncate text-sm font-semibold text-white">
                   Admin User
                 </p>
@@ -212,13 +250,46 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 <p className="truncate text-xs text-slate-400">
                   Administrator
                 </p>
+
               </div>
 
-              <span className="ml-auto text-slate-500">
-                •••
+            </div>
+
+            {/* ================= LOGOUT BUTTON ================= */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="
+                mt-3 flex w-full items-center gap-3
+                rounded-xl px-3 py-3
+                text-sm font-medium
+                text-slate-400
+                transition-all duration-200
+                hover:bg-red-500/10
+                hover:text-red-400
+                active:bg-red-500/20
+              "
+            >
+
+              {/* Logout Icon */}
+              <span
+                className="
+                  flex h-8 w-8 items-center justify-center
+                  rounded-lg bg-white/5
+                  text-base
+                  transition
+                  group-hover:bg-red-500/10
+                "
+              >
+                ↪
               </span>
 
-            </div>
+              {/* Logout Text */}
+              <span>
+                Logout
+              </span>
+
+            </button>
 
           </div>
 
