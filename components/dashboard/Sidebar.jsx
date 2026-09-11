@@ -1,133 +1,103 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const menuSections = [
-  {
-    title: "OVERVIEW",
-    items: [
-      {
-        name: "Dashboard",
-        href: "/dashboard",
-        icon: "▦",
-      },
-    ],
-  },
-
-  {
-    title: "PEOPLE",
-    items: [
-      {
-        name: "Employees",
-        href: "/dashboard/employees",
-        icon: "♙",
-      },
-      {
-        name: "Departments",
-        href: "/dashboard/departments",
-        icon: "▤",
-      },
-      {
-        name: "Designations",
-        href: "/dashboard/designations",
-        icon: "◈",
-      },
-    ],
-  },
-
-  {
-    title: "WORKFORCE",
-    items: [
-      {
-        name: "Attendance",
-        href: "/dashboard/attendance",
-        icon: "◷",
-      },
-      {
-        name: "Leave",
-        href: "/dashboard/leave",
-        icon: "▱",
-      },
-      {
-        name: "Activity record",
-        href: "/dashboard/history",
-        icon: "📥",
-      },
-      {
-        name: "Reports",
-        href: "/dashboard/reports",
-        icon: "▥",
-      },
-    ],
-  },
-
-  {
-    title: "SYSTEM",
-    items: [
-      {
-        name: "Settings",
-        href: "/dashboard/settings",
-        icon: "⚙",
-      },
-    ],
-  },
-];
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  function isActive(href) {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard";
-    }
+  const [loggingOut, setLoggingOut] = useState(false);
 
-    return pathname.startsWith(href);
-  }
+  const menuItems = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: "▦",
+    },
+    {
+      label: "Employees",
+      href: "/dashboard/employees",
+      icon: "♙",
+    },
+    {
+      label: "Departments",
+      href: "/dashboard/departments",
+      icon: "▤",
+    },
+    {
+      label: "Designations",
+      href: "/dashboard/designations",
+      icon: "▥",
+    },
+    {
+      label: "Attendance",
+      href: "/dashboard/attendance",
+      icon: "◷",
+    },
+    {
+      label: "Leave",
+      href: "/dashboard/leave",
+      icon: "▱",
+    },
+    {
+      label: "Reports",
+      href: "/dashboard/reports",
+      icon: "▥",
+    },
+    {
+      label: "Activity History",
+      href: "/dashboard/history",
+      icon: "◴",
+    },
+  ];
 
-  async function handleLogout() {
+  const handleNavigation = (href) => {
+    setMobileOpen(false);
+    router.push(href);
+  };
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    console.log("Logout button clicked");
+
+    setLoggingOut(true);
+
     try {
-      const response = await fetch("/api/auth/logout", {
+      await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
         cache: "no-store",
       });
-
-      if (!response.ok) {
-        console.error("Logout request failed:", response.status);
-      }
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Close mobile sidebar
-      setMobileOpen(false);
-
-      // Force browser navigation.
-      // This prevents mobile browsers from keeping
-      // the previous dashboard page in memory.
-      window.location.href = "/login";
+      window.location.replace("/login");
     }
-  }
+  };
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* ================================
+          MOBILE BACKDROP
+      ================================= */}
       {mobileOpen && (
-        <button
-          type="button"
+        <div
+          className="fixed inset-0 z-[9998] bg-black/60 lg:hidden"
           onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/60 lg:hidden"
-          aria-label="Close menu"
         />
       )}
 
-      {/* Sidebar */}
+      {/* ================================
+          SIDEBAR
+      ================================= */}
       <aside
         className={`
           fixed
           left-0
           top-0
-          z-50
+          z-[9999]
           h-screen
           w-72
           bg-[#0F172A]
@@ -136,163 +106,212 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           transition-transform
           duration-300
           ease-in-out
+
           lg:translate-x-0
 
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+          ${
+            mobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
         `}
       >
-        <div className="flex h-full flex-col">
+        {/* ================================
+            SIDEBAR CONTAINER
+        ================================= */}
+        <div className="flex h-full min-h-0 flex-col">
 
-          {/* =========================
-              HEADER
-          ========================= */}
-          <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-6">
-
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3"
+          {/* ================================
+              LOGO / HEADER
+          ================================= */}
+          <div
+            className="
+              relative
+              z-[10000]
+              flex
+              h-20
+              shrink-0
+              items-center
+              justify-between
+              border-b
+              border-slate-700
+              px-5
+            "
+          >
+            {/* Logo */}
+            <button
+              type="button"
+              onClick={() => handleNavigation("/dashboard")}
+              className="flex cursor-pointer items-center gap-3"
             >
-              {/* Logo */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2563EB] text-lg font-bold shadow-lg shadow-blue-500/20">
-                H
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#2563EB] shadow-lg">
+                <img
+                  src="/logo.png.webp"
+                  alt="HRMS Logo"
+                  className="h-full w-full object-contain p-1"
+                />
               </div>
 
-              {/* Brand */}
-              <div>
-                <p className="text-lg font-bold tracking-tight text-white">
+              <div className="text-left">
+                <h1 className="text-base font-bold tracking-tight text-white">
                   HRMS
-                </p>
+                </h1>
 
                 <p className="text-[11px] text-slate-400">
-                  People Management
+                  Human Resource System
                 </p>
               </div>
-            </Link>
+            </button>
 
-            {/* Mobile close button */}
+            {/* Mobile Close Button */}
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               className="
                 flex
-                h-9
-                w-9
+                h-10
+                w-10
+                cursor-pointer
                 items-center
                 justify-center
-                rounded-lg
-                text-slate-400
+                rounded-xl
+                border
+                border-slate-700
+                text-lg
+                text-slate-300
                 transition
-                hover:bg-white/10
+                hover:bg-slate-800
                 hover:text-white
                 lg:hidden
               "
-              aria-label="Close sidebar"
+              aria-label="Close menu"
             >
-              ✕
+              ×
             </button>
           </div>
 
-          {/* =========================
+          {/* ================================
               NAVIGATION
-          ========================= */}
-          <nav className="flex-1 overflow-y-auto px-4 py-6">
+          ================================= */}
+          <nav
+            className="
+              min-h-0
+              flex-1
+              overflow-y-auto
+              overscroll-contain
+              px-4
+              py-6
+            "
+          >
+            <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">
+              Main Menu
+            </p>
 
-            {menuSections.map((section) => (
-              <div
-                key={section.title}
-                className="mb-7"
-              >
-                {/* Section title */}
-                <p className="mb-3 px-3 text-[10px] font-semibold tracking-[0.15em] text-slate-500">
-                  {section.title}
-                </p>
+            <div className="space-y-1.5">
+              {menuItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href + "/"));
 
-                <div className="space-y-1">
+                return (
+                  <button
+                    key={item.href}
+                    type="button"
+                    onClick={() => handleNavigation(item.href)}
+                    className={`
+                      group
+                      flex
+                      min-h-11
+                      w-full
+                      cursor-pointer
+                      touch-manipulation
+                      select-none
+                      items-center
+                      gap-3
+                      rounded-xl
+                      px-3
+                      text-left
+                      text-sm
+                      font-medium
+                      transition-all
+                      duration-200
 
-                  {section.items.map((item) => {
-                    const active = isActive(item.href);
+                      ${
+                        isActive
+                          ? "bg-[#2563EB] text-white shadow-lg shadow-blue-900/20"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }
+                    `}
+                  >
+                    {/* Icon */}
+                    <span
+                      className={`
+                        flex
+                        h-9
+                        w-9
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-lg
+                        text-base
+                        transition
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`
-                          group
-                          flex
-                          items-center
-                          gap-3
-                          rounded-xl
-                          px-3
-                          py-3
-                          text-sm
-                          font-medium
-                          transition-all
-                          duration-200
+                        ${
+                          isActive
+                            ? "bg-white/10 text-white"
+                            : "bg-slate-800/70 text-slate-400 group-hover:text-white"
+                        }
+                      `}
+                    >
+                      {item.icon}
+                    </span>
 
-                          ${
-                            active
-                              ? "bg-[#2563EB] text-white shadow-lg shadow-blue-900/20"
-                              : "text-slate-400 hover:bg-white/5 hover:text-white"
-                          }
-                        `}
-                      >
-                        {/* Icon */}
-                        <span
-                          className={`
-                            flex
-                            h-8
-                            w-8
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-lg
-                            text-base
-                            transition
-
-                            ${
-                              active
-                                ? "bg-white/15 text-white"
-                                : "bg-white/5 text-slate-400 group-hover:text-white"
-                            }
-                          `}
-                        >
-                          {item.icon}
-                        </span>
-
-                        {/* Name */}
-                        <span>
-                          {item.name}
-                        </span>
-
-                        {/* Active indicator */}
-                        {active && (
-                          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-white" />
-                        )}
-                      </Link>
-                    );
-                  })}
-
-                </div>
-              </div>
-            ))}
-
+                    {/* Label */}
+                    <span className="truncate">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </nav>
 
-          {/* =========================
-              USER + LOGOUT
-          ========================= */}
-          <div className="shrink-0 border-t border-white/10 p-4">
-
-            {/* User profile */}
-            <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
-
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-sm font-semibold text-white">
+          {/* ================================
+              USER / LOGOUT
+          ================================= */}
+          <div
+            className="
+              relative
+              z-[10000]
+              shrink-0
+              border-t
+              border-slate-700
+              bg-[#0F172A]
+              p-4
+            "
+          >
+            {/* User Information */}
+            <div className="mb-3 flex items-center gap-3 rounded-xl bg-slate-800/70 p-3">
+              <div
+                className="
+                  flex
+                  h-10
+                  w-10
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#2563EB]
+                  text-sm
+                  font-bold
+                  text-white
+                "
+              >
                 A
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-white">
                   Admin User
                 </p>
@@ -301,57 +320,54 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                   Administrator
                 </p>
               </div>
-
-              <span className="ml-auto text-slate-500">
-                •••
-              </span>
             </div>
 
-            {/* Logout button */}
+            {/* Logout Button */}
             <button
               type="button"
+              disabled={loggingOut}
               onClick={handleLogout}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              onTouchStart={(event) => {
+                event.stopPropagation();
+              }}
               className="
-                mt-3
+                relative
+                z-[10001]
                 flex
+                min-h-12
                 w-full
+                cursor-pointer
+                touch-manipulation
+                select-none
                 items-center
                 gap-3
                 rounded-xl
-                px-3
+                px-4
                 py-3
+                text-left
                 text-sm
                 font-medium
-                text-slate-400
+                text-red-400
                 transition-all
                 duration-200
                 hover:bg-red-500/10
-                hover:text-red-400
+                hover:text-red-300
                 active:scale-[0.98]
+                disabled:cursor-not-allowed
+                disabled:opacity-60
               "
             >
-              {/* Logout icon */}
-              <span
-                className="
-                  flex
-                  h-8
-                  w-8
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-lg
-                  bg-white/5
-                  text-base
-                "
-              >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-base">
                 ↪
               </span>
 
               <span>
-                Logout
+                {loggingOut ? "Logging out..." : "Logout"}
               </span>
             </button>
-
           </div>
         </div>
       </aside>

@@ -6,14 +6,22 @@ import { useState } from "react";
 
 export default function MobileSidebar({ role, email, logout }) {
   const pathname = usePathname();
+
+  // Mobile sidebar state
   const [open, setOpen] = useState(false);
+
+  // Logout loading state
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const isActive = (href) => {
     if (href === "/dashboard") {
       return pathname === "/dashboard";
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
   };
 
   const linkClass = (href) => {
@@ -32,22 +40,52 @@ export default function MobileSidebar({ role, email, logout }) {
     ADMIN: [
       {
         section: "OVERVIEW",
-        items: [{ name: "Dashboard", href: "/dashboard", icon: "▦" }],
+        items: [
+          {
+            name: "Dashboard",
+            href: "/dashboard",
+            icon: "▦",
+          },
+        ],
       },
       {
         section: "PEOPLE",
         items: [
-          { name: "Employees", href: "/dashboard/employees", icon: "👥" },
-          { name: "Departments", href: "/dashboard/departments", icon: "▤" },
-          { name: "Designations", href: "/dashboard/designations", icon: "▣" },
+          {
+            name: "Employees",
+            href: "/dashboard/employees",
+            icon: "👥",
+          },
+          {
+            name: "Departments",
+            href: "/dashboard/departments",
+            icon: "▤",
+          },
+          {
+            name: "Designations",
+            href: "/dashboard/designations",
+            icon: "▣",
+          },
         ],
       },
       {
         section: "MANAGEMENT",
         items: [
-          { name: "Activity record", href: "/dashboard/history", icon: "📥" },
-          { name: "Attendance", href: "/dashboard/attendance", icon: "◷" },
-          { name: "Leave", href: "/dashboard/leave", icon: "▤" },
+          {
+            name: "Activity record",
+            href: "/dashboard/history",
+            icon: "📥",
+          },
+          {
+            name: "Attendance",
+            href: "/dashboard/attendance",
+            icon: "◷",
+          },
+          {
+            name: "Leave",
+            href: "/dashboard/leave",
+            icon: "▤",
+          },
         ],
       },
     ],
@@ -55,14 +93,32 @@ export default function MobileSidebar({ role, email, logout }) {
     MANAGER: [
       {
         section: "OVERVIEW",
-        items: [{ name: "Dashboard", href: "/dashboard", icon: "▦" }],
+        items: [
+          {
+            name: "Dashboard",
+            href: "/dashboard",
+            icon: "▦",
+          },
+        ],
       },
       {
         section: "TEAM",
         items: [
-          { name: "My Team", href: "/dashboard/team", icon: "👥" },
-          { name: "Attendance", href: "/dashboard/attendance", icon: "◷" },
-          { name: "Leave Approval", href: "/dashboard/leave", icon: "▤" },
+          {
+            name: "My Team",
+            href: "/dashboard/team",
+            icon: "👥",
+          },
+          {
+            name: "Attendance",
+            href: "/dashboard/attendance",
+            icon: "◷",
+          },
+          {
+            name: "Leave Approval",
+            href: "/dashboard/leave",
+            icon: "▤",
+          },
         ],
       },
     ],
@@ -70,14 +126,32 @@ export default function MobileSidebar({ role, email, logout }) {
     EMPLOYEE: [
       {
         section: "OVERVIEW",
-        items: [{ name: "Dashboard", href: "/dashboard", icon: "▦" }],
+        items: [
+          {
+            name: "Dashboard",
+            href: "/dashboard",
+            icon: "▦",
+          },
+        ],
       },
       {
         section: "MY WORK",
         items: [
-          { name: "My Profile", href: "/dashboard/profile", icon: "👤" },
-          { name: "Attendance", href: "/dashboard/attendance", icon: "◷" },
-          { name: "My Leave", href: "/dashboard/leave", icon: "▤" },
+          {
+            name: "My Profile",
+            href: "/dashboard/profile",
+            icon: "👤",
+          },
+          {
+            name: "Attendance",
+            href: "/dashboard/attendance",
+            icon: "◷",
+          },
+          {
+            name: "My Leave",
+            href: "/dashboard/leave",
+            icon: "▤",
+          },
         ],
       },
     ],
@@ -85,73 +159,145 @@ export default function MobileSidebar({ role, email, logout }) {
 
   const sections = menu[role] || [];
 
+  // ==========================================
+  // LOGOUT
+  // ==========================================
+
+  const handleLogout = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (loggingOut) {
+      return;
+    }
+
+    console.log("LOGOUT BUTTON CLICKED");
+
+    setLoggingOut(true);
+
+    try {
+      if (typeof logout === "function") {
+        await logout();
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+
+    window.location.replace("/login");
+  };
+
   return (
     <>
-      {/* Mobile Header */}
+      {/* ==========================================
+          MOBILE HEADER
+      ========================================== */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+        {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="flex h-15 w-15 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
-  <img
-    src="/logo.png.webp"
-    alt="HRMS Logo"
-    className="h-full w-full object-contain p-1"
-  />
-</div>
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
+            <img
+              src="/logo.png.webp"
+              alt="HRMS Logo"
+              className="h-full w-full object-contain p-1"
+            />
+          </div>
 
           <span className="text-lg font-bold text-slate-900">
             HRMS
           </span>
         </div>
 
+        {/* Open Menu */}
         <button
+          type="button"
           onClick={() => setOpen(true)}
-          className="rounded-lg p-2 text-slate-700 hover:bg-slate-100"
+          className="flex h-10 w-10 cursor-pointer touch-manipulation items-center justify-center rounded-lg text-xl text-slate-700 hover:bg-slate-100"
           aria-label="Open menu"
         >
           ☰
         </button>
       </div>
 
-      {/* Overlay */}
+      {/* ==========================================
+          OVERLAY
+      ========================================== */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-[9998] bg-black/40 lg:hidden"
           onClick={closeMenu}
         />
       )}
 
-      {/* Mobile Sidebar */}
+      {/* ==========================================
+          MOBILE SIDEBAR
+      ========================================== */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-white shadow-xl transition-transform duration-300 lg:hidden ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`
+          fixed
+          left-0
+          top-0
+          z-[9999]
+          flex
+          h-screen
+          w-72
+          flex-col
+          bg-white
+          shadow-2xl
+          transition-transform
+          duration-300
+          ease-in-out
+          lg:hidden
+          ${
+            open
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+        `}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        {/* ==========================================
+            SIDEBAR HEADER
+        ========================================== */}
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB] font-bold text-white">
-              H
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#2563EB]">
+              <img
+                src="/logo.png.webp"
+                alt="HRMS Logo"
+                className="h-full w-full object-contain p-1"
+              />
             </div>
 
             <div>
-              <p className="font-bold text-slate-900">HRMS</p>
-              <p className="text-xs text-slate-500">Human Resources</p>
+              <p className="font-bold text-slate-900">
+                HRMS
+              </p>
+
+              <p className="text-xs text-slate-500">
+                Human Resources
+              </p>
             </div>
           </div>
 
+          {/* Close */}
           <button
+            type="button"
             onClick={closeMenu}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
             aria-label="Close menu"
           >
             ✕
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-5">
+        {/* ==========================================
+            NAVIGATION
+        ========================================== */}
+        <nav className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
           {sections.map((section) => (
-            <div key={section.section} className="mb-6">
+            <div
+              key={section.section}
+              className="mb-6"
+            >
               <p className="mb-2 px-3 text-[11px] font-semibold tracking-wider text-slate-400">
                 {section.section}
               </p>
@@ -164,11 +310,13 @@ export default function MobileSidebar({ role, email, logout }) {
                     onClick={closeMenu}
                     className={linkClass(item.href)}
                   >
-                    <span className="w-5 text-center">
+                    <span className="flex w-5 shrink-0 items-center justify-center text-center">
                       {item.icon}
                     </span>
 
-                    <span>{item.name}</span>
+                    <span>
+                      {item.name}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -176,8 +324,11 @@ export default function MobileSidebar({ role, email, logout }) {
           ))}
         </nav>
 
-        {/* User + Logout */}
-        <div className="border-t border-slate-200 p-4">
+        {/* ==========================================
+            USER + LOGOUT
+        ========================================== */}
+        <div className="relative z-[10000] shrink-0 border-t border-slate-200 bg-white p-4">
+          {/* User */}
           <div className="mb-3 rounded-xl bg-slate-50 p-3">
             <p className="truncate text-sm font-medium text-slate-900">
               {email}
@@ -188,15 +339,46 @@ export default function MobileSidebar({ role, email, logout }) {
             </p>
           </div>
 
-          <form action={logout}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
-            >
-              <span>↪</span>
-              Logout
-            </button>
-          </form>
+          {/* Logout */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="
+              relative
+              z-[10001]
+              flex
+              min-h-12
+              w-full
+              cursor-pointer
+              touch-manipulation
+              select-none
+              items-center
+              gap-3
+              rounded-xl
+              px-3
+              py-3
+              text-left
+              text-sm
+              font-medium
+              text-red-600
+              transition
+              hover:bg-red-50
+              active:scale-[0.98]
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+          >
+            <span className="text-base">
+              ↪
+            </span>
+
+            <span>
+              {loggingOut
+                ? "Logging out..."
+                : "Logout"}
+            </span>
+          </button>
         </div>
       </aside>
     </>
